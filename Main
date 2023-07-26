@@ -1,0 +1,205 @@
+package Sudoku;
+
+import java.util.*;
+
+public class Sudoku {
+                           //j  i
+    int[][] sudoku = new int[9][9];
+    int[][] possibilities = new int[9][9];
+    
+    Random rand = new Random();
+    
+    public Sudoku(){
+        //first, input sudoku
+        // 050080700710900200000040100090060003006400005401000000070090008060002500000000000
+        Scanner scan = new Scanner(System.in);
+        String[] input = scan.next().split("");
+        
+        input = "050080700710900200000040100090060003006400005401000000070090008060002500000000000".split("");
+        
+        for(int i = 0; i < 81; i++){
+            sudoku[i/9][i%9] = Integer.valueOf(input[i]);
+        }
+        
+        while(!checkCompleteSudoku()){
+            System.out.println(1);
+            for(int val = 1; val < 10; val++){
+                System.out.println(2);
+                do{ System.out.println("box");
+                    checkPossibilities(val);
+                }while(checkPossPerBox(val));
+                do{ System.out.println("hori");
+                    checkPossibilities(val);
+                }while(checkPossPerHoriLine(val));
+                do{ System.out.println("vert");
+                    checkPossibilities(val);
+                }while(checkPossPerVertLine(val));
+            }
+        }
+    }
+    
+    public boolean checkCompleteSudoku(){
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                if(!checkCompleteSquare(i, j)){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    
+    public boolean checkCompleteSquare(int sqx, int sqy){
+        ArrayList<Integer> list = new ArrayList<>();
+        int a = sqx * 3;
+        int b = sqy * 3;
+        for(int x = a; x < a + 3; x++){
+            for(int y = b; y < b + 3; y++){
+                list.add(sudoku[y][x]);
+            }
+        }
+        
+        int count = 0;
+        for(int c = 1; c < 10; c++){
+            if(list.contains(c)){
+                count++;
+            }
+        }
+        return count == 9;
+    }
+    
+    public boolean checkHoriLine(int j, int val){ // is val present in horizontal line
+        for(int i = 0; i < 9; i++){
+            if(sudoku[j][i] == val){
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    public boolean checkVertLine(int i, int val){ // is val present in vertical line
+        for(int j = 0; j < 9; j++){
+            if(sudoku[j][i] == val){
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    public boolean checkBox(int sqx, int sqy, int val){ // is val present in box
+        int a = sqx * 3;
+        int b = sqy * 3;
+        for(int x = a; x < a + 3; x++){
+            for(int y = b; y < b + 3; y++){
+                if(sudoku[y][x] == val){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    public void checkPossibilities(int val){ 
+        possibilities = sudoku;
+        for(int i = 0; i < 9; i++){
+            for(int j = 0; j < 9; j++){
+                if(possibilities[j][i] == 0){
+                    if(!checkBox(i/3, j/3, val)){
+                        if(!checkHoriLine(j, val) && !checkVertLine(i, val)){
+                            possibilities[j][i] = val;
+                        }
+                    }
+                }
+            }
+        }
+        
+        
+    }
+    
+    public boolean checkPossPerBox(int val){
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                int a = i * 3;
+                int b = j * 3;
+                int count = 0;
+                int[] coord = new int[2];
+                for(int x = a; x < a + 3; x++){
+                    for(int y = b; y < b + 3; y++){
+                        if(possibilities[y][x] == val){
+                            count++;
+                            coord[0] = y;
+                            coord[1] = x;
+                        }
+                    }
+                }
+                if(count == 1){
+                    sudoku[coord[0]][coord[1]] = val;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    public boolean checkPossPerVertLine(int val){
+        int count = 0;
+        int[] coord = new int[2];
+        for(int i = 0; i < 9; i++){
+            for(int j = 0; j < 9; j++){
+                if(possibilities[j][i] == val){
+                    count++;
+                    coord[0] = j;
+                    coord[1] = i;
+                }
+            }
+            if(count == 1){
+                sudoku[coord[0]][coord[1]] = val;
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean checkPossPerHoriLine(int val){
+        int count = 0;
+        int[] coord = new int[2];
+        for(int j = 0; j < 9; j++){
+            for(int i = 0; i < 9; i++){
+                if(possibilities[j][i] == val){
+                    count++;
+                    coord[0] = j;
+                    coord[1] = i;
+                }
+            }
+            if(count == 1){
+                sudoku[coord[0]][coord[1]] = val;
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    
+    public static void main(String[] args){
+        new Sudoku();
+    }
+}
+/*
+New Method
+Go through each number and make a list of where that number could go
+
+If one possibility per box, then place number in that place
+recheck possible places
+loop till finish
+
+If one possibility per line, then place number in that place
+recheck possible places
+loop till finish
+
+maybe needed:
+eliminate possibilities based on line patterns - if possibilities in a certain box line up,
+then that line is taken, other possibilities from other boxes that are in the same line are eliminated.
+
+
+*/
+
